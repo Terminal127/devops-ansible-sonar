@@ -46,14 +46,21 @@ def drop_table():
 @app.route('/search', methods=['POST'])
 def search_employee():
     search_name = request.form['search_name']
-    employees = db.employees.find({'name': search_name})
+
+    # Using regex for a case-insensitive search
+    query = {'name': {'$regex': search_name, '$options': 'i'}}
+    
+    employees = mongo.db.employees.find(query)
 
     if employees.count() == 0:
         message = f"No employee found with the name '{search_name}'."
     else:
         message = f"Employee(s) found with the name '{search_name}':"
+        for employee in employees:
+            message += f" ({employee['name']}, Age: {employee.get('age', 'N/A')}, Gender: {employee.get('gender', 'N/A')})"
+    
+    return render_template('index.html', employees=employees, message=message)   
 
-    return render_template('index.html', employees=employees, message=message)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)

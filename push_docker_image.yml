@@ -1,8 +1,11 @@
-- name: Build Docker image
-  docker_image:
-    name: "{{ docker_image_name }}"
-    path: "{{ path_to_dockerfile }}"
-    tag: "{{ image_tag }}"
-    push: yes
-    repository: "{{ dockerhub_username }}"
-    force_tag: yes
+---
+- hosts: localhost
+  tasks:
+    - name: Build Docker image
+      community.docker.docker_image:
+        name: "{{ docker_image_name }}"
+        path: "{{ path_to_dockerfile }}"
+        tag: "{{ image_tag }}"
+        push: yes
+        repository: "{{ dockerhub_username }}"
+        force_tag: yes

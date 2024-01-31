@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, flash
 from flask_pymongo import PyMongo
 import redis
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
 
@@ -16,23 +17,39 @@ mongo = PyMongo(app)
 db = mongo.db
 redis_db = redis.StrictRedis.from_url(app.config['REDIS_URI'])
 
-if not redis_db.exists('admins'):
-    redis_db.sadd('admins', 'admin')  # Add 'admin' as the initial admin username
-if not redis_db.exists('admin'):
-    redis_db.set('admin', 'adminpass')  # Set the password for the initial admin
+# Check if the database 'users' exists, if not, create it
+if not redis_db.exists('users'):
+    redis_db.hset('users', 'anubhav', 'anubhav')  # Add 'anubhav' as the initial user with password 'anubhav'
+
 # Check if the database exists, if not, create it
 def create_database():
     try:
-        mongo.db.command("serverStatus")
+        # Check if 'employees' collection exists, if not, create it
+        if 'employees' not in mongo.db.list_collection_names():
+            mongo.db.create_collection('employees')
+            print("Collection 'employees' created.")
+
     except Exception as e:
         print(e)
-        print("Database not present. Creating...")
-        mongo.db.create_collection('employees')
-        print("Database created.")
+        print("Error creating database.")
 
 create_database()
 
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+# User class for Flask-Login
+class User(UserMixin):
+    pass
+
+@login_manager.user_loader
+def load_user(user_id):
+    user = User()
+    user.id = user_id
+    return user
+
 @app.route('/')
+@login_required
 def index():
     employees = db.employees.find()
     database_name = app.config['MONGO_URI'].split('/')[-1]  # Extract database name
@@ -40,25 +57,21 @@ def index():
 
 @app.route('/add', methods=['POST'])
 def add_employee():
-    create_database()  # Ensure the 'employees' collection and 'admins' set exist
+    if 'username' not in session or session['username'] != 'anubhav':
+        flash("Unauthorized access. Please log in as anubhav.")
+        return redirect('/')
 
-    if request.method == 'POST':
-        if 'username' not in session or session['username'] not in redis_db.smembers('admins'):
-            flash("Unauthorized access. Please log in as admin.")
-            return redirect('/')
+    name = request.form['name']
+    age = request.form['age']
+    gender = request.form['gender']
 
-        name = request.form['name']
-        age = request.form['age']
-        gender = request.form['gender']
-
-        db.employees.insert_one({'name': name, 'age': age, 'gender': gender})
-
+    db.employees.insert_one({'name': name, 'age': age, 'gender': gender})
     return redirect('/')
 
 @app.route('/drop', methods=['POST'])
 def drop_table():
-    if 'username' not in session or session['username'] not in redis_db.smembers('admins'):
-        flash("Unauthorized access. Please log in as admin.")
+    if 'username' not in session or session['username'] != 'anubhav':
+        flash("Unauthorized access. Please log in as anubhav.")
         return redirect('/')
 
     db.employees.drop()
@@ -76,22 +89,25 @@ def search_employee():
 
     return render_template('index.html', employees=employees, message=message)
 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    create_database()  # Ensure the initial admin username and password are set
+    create_database()
 
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
 
-        if username and password:
-            stored_password = redis_db.get(username)
-            if stored_password and stored_password.decode('utf-8') == password:
-                session['username'] = username
-                flash(f"Logged in as {username}.")
-                return redirect('/')
-            else:
-                flash("Invalid credentials. Please try again.")
+        stored_password = redis_db.hget('users', username)
+
+        if stored_password and stored_password.decode('utf-8') == password:
+            user = User()
+            user.id = username
+            login_user(user)
+            session['username'] = username
+            flash(f"Logged in as {username}.")
+            return redirect('/')
+
+        flash("Invalid credentials. Please try again.")
 
     return render_template('login.html')
 

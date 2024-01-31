@@ -1,24 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee List</title>
 </head>
+
 <body>
-    <h1>Employee List</h1>
-    <form action="/add" method="post">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required><br>
-
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age" required><br>
-
-        <label for="gender">Gender:</label>
-        <input type="text" id="gender" name="gender" required><br>
-
-        <input type="submit" value="Add Employee">
+    <h1>Employee List (Database: {{ database_name }})</h1>
+    <hr>
+    <form action="/search" method="post">
+        <label for="search_name">Search by Name:</label>
+        <input type="text" id="search_name" name="search_name"><br>
+        <input type="submit" value="Search">
+    </form>
+    {% if message %}
+    <p>{{ message }}</p>
+    {% endif %}
+    <hr>
+    <h2>Login</h2>
+    <form action="/login" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <input type="submit" value="Login">
     </form>
     <hr>
     <h2>Employee Records</h2>
@@ -39,6 +47,18 @@
     <form action="/drop" method="post">
         <input type="submit" value="Drop Table">
     </form>
+    <hr>
+    <h2>Add Employee</h2>
+    <form action="/add" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br>
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required><br>
+        <label for="gender">Gender:</label>
+        <input type="text" id="gender" name="gender" required><br>
+        <input type="submit" value="Add Employee">
+    </form>
 </body>
+
 </html>
 

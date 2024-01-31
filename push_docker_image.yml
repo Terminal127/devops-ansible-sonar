@@ -1,11 +1,14 @@
----
 - hosts: localhost
+  gather_facts: false
   tasks:
     - name: Build Docker image
       docker_image:
         name: "{{ docker_image_name }}"
-        path: "{{ path_to_dockerfile }}"  # Adjust path to Dockerfile
+        path: "{{ path_to_dockerfile }}"
         tag: "{{ image_tag }}"
         push: yes
         repository: "{{ dockerhub_username }}"
         force_tag: yes
+      delegate_to: localhost
+      vars:
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

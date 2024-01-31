@@ -4,7 +4,7 @@
     - name: Build Docker image
       community.docker.docker_image:
         name: "{{ docker_image_name }}"
-        path: "{{ path_to_dockerfile }}"
+        source: "{{ path_to_dockerfile }}"
         tag: "{{ image_tag }}"
         push: yes
         repository: "{{ dockerhub_username }}"

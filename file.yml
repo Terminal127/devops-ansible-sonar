@@ -1,0 +1,40 @@
+---
+- hosts: localhost
+  become: true
+
+  vars:
+    dockerhub_username: "the127terminal"
+    dockerhub_password: "Bt.z@w7TzJy4C72"
+
+  tasks:
+    - name: Ensure Docker is installed
+      become: true
+      apt:
+        name: docker.io
+        state: present
+      tags:
+        - docker
+
+    - name: Build Docker image
+      community.docker.docker_image:
+        name: the127terminal/score
+        tag: latest
+        build:
+          path: /home/ubuntu
+        source: build
+      tags:
+        - docker
+
+    - name: Log in to Docker Hub
+      docker_login:
+        username: "{{ dockerhub_username }}"
+        password: "{{ dockerhub_password }}"
+      tags:
+        - docker
+
+    - name: Push Docker image to Docker Hub
+      community.docker.docker_image_push:
+        name: the127terminal/score
+        tag: latest
+      tags:
+        - docker

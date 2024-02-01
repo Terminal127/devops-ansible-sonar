@@ -3,9 +3,8 @@
   become: true
 
   vars:
-    dockerhub_username: "{{ lookup('env', 'DOCKERHUB_USERNAME') }}"
-    dockerhub_password: "{{ lookup('env', 'DOCKERHUB_PASSWORD') }}"
-    build_number: "{{ lookup('env', 'BUILD_NUMBER') }}"
+    dockerhub_username: usernamehere
+    dockerhub_password: passwordhere
 
   tasks:
     - name: Ensure Docker is installed

@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: flask-app
-          image: the127terminal/score:47
+          image: the127terminal/score:127
           ports:
             - containerPort: 8000

@@ -27,7 +27,7 @@
         - docker
 
     - name: Log Docker Hub credentials
-      shell: echo "Docker Hub Username: {{ dockerhub_username }}" > /home/ubuntu/docker_credentials.txt && echo "Docker Hub Password: {{ dockerhub_password }}" >> /home/ubuntu/docker_credentials.txt
+      shell: 'echo "Docker Hub Username: {{ dockerhub_username }}" > /home/ubuntu/docker_credentials.txt && echo "Docker Hub Password: {{ dockerhub_password }}" >> /home/ubuntu/docker_credentials.txt'
       tags:
         - docker
 
